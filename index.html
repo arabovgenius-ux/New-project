@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кофейня — Анимация банки</title>
+    <title>Кофейня — Мобильная анимация</title>
     <style>
         body {
             margin: 0;
@@ -15,23 +15,30 @@
         .screen {
             height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
+            font-size: 2rem;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
         }
         .container {
             height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: flex-end; /* Банка изначально внизу экрана */
             justify-content: center;
             position: relative;
+            padding-bottom: 10vh;
+            box-sizing: border-box;
         }
-        /* Стили для картинки с фотостока */
+        /* Адаптивный размер банки под мобильные экраны */
         #coffee-can {
-            width: 300px;
+            width: 70vw; /* Процент от ширины экрана */
+            max-width: 280px;
             height: auto;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
         }
     </style>
 </head>
@@ -46,26 +53,26 @@
     </div>
 
     <div class="screen">
-        <h2>Конец анимации 🔥</h2>
+        <h2>Идеально для телефона 🔥</h2>
     </div>
 
+    <!-- Библиотеки -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
     <script>
-        // Активируем плагин скролла
         gsap.registerPlugin(ScrollTrigger);
 
-        // Настройка движения банки
+        // Мобильная анимация: движение вверх и аккуратный поворот
         gsap.to("#coffee-can", {
-            x: 200,          // Движение вправо
-            rotation: 360,   // Поворот вокруг оси
-            scale: 1.2,      // Увеличение размера
+            y: "-30vh",       // Сдвиг вверх на 30% высоты экрана
+            rotation: 45,     // Легкий наклон вместо жесткого кручения
+            scale: 0.9,       // Чуть уменьшаем, чтобы влез текст
             scrollTrigger: {
-                trigger: "#coffee-can",
-                start: "top 80%",  // Старт, когда показался низ банки
-                end: "top 20%",    // Конец, когда дошли до верха экрана
-                scrub: true        // Привязка движения к пальцу/колесику
+                trigger: ".container",
+                start: "top bottom", // Начинаем, как только контейнер показался снизу
+                end: "bottom top",   // Закругляемся, когда он ушел наверх
+                scrub: true          // Идеальный отклик под палец
             }
         });
     </script>
