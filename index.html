@@ -3,83 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кнопка</title>
+    <title>Кофейня — Анимация банки</title>
     <style>
-        /* Центрируем всё на экране */
         body {
             margin: 0;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: sans-serif;
+            overflow-x: hidden;
+        }
+        .screen {
             height: 100vh;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             justify-content: center;
+            font-size: 3rem;
+        }
+        .container {
+            height: 100vh;
+            display: flex;
             align-items: center;
-            background-color: #121212;
-            font-family: sans-serif;
-            overflow: hidden;
+            justify-content: center;
+            position: relative;
         }
-
-        /* Зеленая кнопка */
-        .btn {
-            padding: 15px 40px;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            background-color: #28a745;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
-            transition: transform 0.1s;
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        /* Контейнер для цифр (скрыт по умолчанию) */
-        .numbers-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-            font-size: 48px;
-            font-weight: bold;
-            color: #ffffff;
-        }
-
-        /* Анимация вертикального шатания */
-        @keyframes shakeVertical {
-            0% { transform: translateY(0); }
-            25% { transform: translateY(-15px); }
-            75% { transform: translateY(15px); }
-            100% { transform: translateY(0); }
-        }
-
-        /* Класс, который заставит цифры шататься бесконечно */
-        .shake {
-            animation: shakeVertical 0.6s ease-in-out infinite;
+        /* Стили для картинки с фотостока */
+        #coffee-can {
+            width: 300px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body>
 
-    <button class="btn" onclick="showNumbers()">ЖМИ</button>
-
-    <div id="numbers" class="numbers-container">
-        <div>6</div>
-        <div>7</div>
+    <div class="screen">
+        <h1>Листай вниз 👇</h1>
     </div>
 
+    <div class="container">
+        <img id="coffee-can" src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?q=80&w=600&auto=format&fit=crop" alt="Банка кофе">
+    </div>
+
+    <div class="screen">
+        <h2>Конец анимации 🔥</h2>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
     <script>
-        function showNumbers() {
-            const numbersBlock = document.getElementById('numbers');
-            
-            // Показываем блок с цифрами
-            numbersBlock.style.display = 'flex';
-            
-            // Включаем бесконечное шатание
-            numbersBlock.classList.add('shake');
-        }
+        // Активируем плагин скролла
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Настройка движения банки
+        gsap.to("#coffee-can", {
+            x: 200,          // Движение вправо
+            rotation: 360,   // Поворот вокруг оси
+            scale: 1.2,      // Увеличение размера
+            scrollTrigger: {
+                trigger: "#coffee-can",
+                start: "top 80%",  // Старт, когда показался низ банки
+                end: "top 20%",    // Конец, когда дошли до верха экрана
+                scrub: true        // Привязка движения к пальцу/колесику
+            }
+        });
     </script>
 
 </body>
