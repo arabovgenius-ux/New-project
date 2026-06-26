@@ -3,6 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кнопка</title>
+    <style>
+        /* Центрируем всё на экране */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #121212;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        /* Зеленая кнопка */
+        .btn {
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Контейнер для цифр (скрыт по умолчанию) */
+        .numbers-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        /* Анимация вертикального шатания */
+        @keyframes shakeVertical {
+            0% { transform: translateY(0); }
+            25% { transform: translateY(-15px); }
+            75% { transform: translateY(15px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Класс, который заставит цифры шататься бесконечно */
+        .shake {
+            animation: shakeVertical 0.6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="btn" onclick="showNumbers()">ЖМИ</button>
+
+    <div id="numbers" class="numbers-container">
+        <div>6</div>
+        <div>7</div>
+    </div>
+
+    <script>
+        function showNumbers() {
+            const numbersBlock = document.getElementById('numbers');
+            
+            // Показываем блок с цифрами
+            numbersBlock.style.display = 'flex';
+            
+            // Включаем бесконечное шатание
+            numbersBlock.classList.add('shake');
+        }
+    </script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BIG COFFEE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
