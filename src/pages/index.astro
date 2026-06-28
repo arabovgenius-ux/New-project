@@ -1,0 +1,144 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const menuItems = [
+	{ name: 'Эспрессо', price: '150₽', desc: 'Крепкий классический вкус' },
+	{ name: 'Капучино', price: '220₽', desc: 'Нежная молочная пенка' },
+	{ name: 'Латте Макиато', price: '250₽', desc: 'Трехслойный кофейный арт' },
+	{ name: 'Раф Кофе', price: '280₽', desc: 'Сливки, ванильный сахар' },
+];
+---
+
+<Layout title="Кофейня «Аромат»">
+	<header class="navbar">
+		<div class="logo">☕ Аромат</div>
+		<nav>
+			<a href="#about">О нас</a>
+			<a href="#menu">Меню</a>
+			<a href="#contacts">Контакты</a>
+		</nav>
+	</header>
+
+	<section class="hero">
+		<div class="hero-content">
+			<h1>Идеальное утро начинается здесь</h1>
+			<p>Свежеобжаренное зерно, авторские рецепты и уютная атмосфера.</p>
+			<a href="#menu" class="btn">Смотреть меню</a>
+		</div>
+	</section>
+
+	<section id="menu" class="menu-section">
+		<h2>Наше Меню</h2>
+		<div class="menu-grid">
+			{menuItems.map(item => (
+				<div class="menu-item">
+					<div class="menu-header">
+						<h3>{item.name}</h3>
+						<span class="price">{item.price}</span>
+					</div>
+					<p>{item.desc}</p>
+				</div>
+			))}
+		</div>
+	</section>
+
+	<footer id="contacts" class="footer">
+		<h2>Ждем вас в гости</h2>
+		<div class="contacts-info">
+			<p><i data-lucide="map-pin"></i> ул. Кофейная, д. 10</p>
+			<p><i data-lucide="clock"></i> Ежедневно: 08:00 — 22:00</p>
+			<p><i data-lucide="phone"></i> +7 (999) 123-45-67</p>
+		</div>
+	</footer>
+</Layout>
+
+<style>
+	/* Стили навигации */
+	.navbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 20px 5%;
+		background-color: #fff;
+		box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+	}
+	.logo {
+		font-size: 1.5rem;
+		font-weight: bold;
+		color: var(--accent);
+	}
+	nav a {
+		margin-left: 20px;
+		text-decoration: none;
+		color: var(--text-dark);
+		font-weight: 700;
+	}
+
+	/* Стили баннера */
+	.hero {
+		background: linear-gradient(rgba(44, 27, 24, 0.6), rgba(44, 27, 24, 0.6)), url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=1600') center/cover no-repeat;
+		height: 60vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		color: #fff;
+		padding: 0 20px;
+	}
+	.hero h1 { font-size: 3rem; margin-bottom: 20px; }
+	.hero p { font-size: 1.2rem; margin-bottom: 30px; }
+	.btn {
+		background-color: var(--accent);
+		color: white;
+		padding: 12px 30px;
+		text-decoration: none;
+		border-radius: 5px;
+		font-weight: bold;
+	}
+
+	/* Стили меню */
+	.menu-section {
+		padding: 60px 5%;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+	.menu-section h2 { text-align: center; margin-bottom: 40px; font-size: 2.5rem; }
+	.menu-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 30px;
+	}
+	.menu-item {
+		background: #fff;
+		padding: 20px;
+		border-radius: 8px;
+		box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+	}
+	.menu-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 10px;
+	}
+	.price { font-weight: bold; color: var(--accent); }
+
+	/* Стили подвала */
+	.footer {
+		background-color: var(--text-dark);
+		color: #fff;
+		padding: 40px 20px;
+		text-align: center;
+	}
+	.footer h2 { margin-bottom: 20px; }
+	.contacts-info {
+		display: flex;
+		justify-content: center;
+		gap: 30px;
+		flex-wrap: wrap;
+	}
+	.contacts-info p {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+</style>
