@@ -1,5 +1,0 @@
-{
-  "type": "module",
-  "scripts": { "build": "astro build" },
-  "dependencies": { "astro": "latest" }
-}
