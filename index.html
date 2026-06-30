@@ -1,1374 +1,768 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="scroll-smooth">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MOKA — Specialty Coffee</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.min.js"></script>
-<script src="https://unpkg.com/split-type"></script>
-
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&display=swap');
-
-  :root {
-    --cream: #F5F0E8;
-    --espresso: #1A0F0A;
-    --mocha: #3D2314;
-    --caramel: #C8844A;
-    --latte: #D4A97A;
-    --milk: #FAF7F2;
-    --ash: #8A8278;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: auto; }
-
-  body {
-    background: var(--milk);
-    color: var(--espresso);
-    font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
-    cursor: none;
-  }
-
-  /* Custom cursor */
-  .cursor {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    background: var(--caramel);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s, height 0.3s, background 0.3s;
-    mix-blend-mode: multiply;
-  }
-
-  .cursor-follower {
-    position: fixed;
-    width: 36px;
-    height: 36px;
-    border: 1px solid var(--caramel);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    transform: translate(-50%, -50%);
-    transition: all 0.12s ease;
-  }
-
-  body:hover .cursor { opacity: 1; }
-
-  /* Loader */
-  #loader {
-    position: fixed;
-    inset: 0;
-    background: var(--espresso);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  #loader .loader-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(3rem, 8vw, 6rem);
-    color: var(--cream);
-    letter-spacing: 0.3em;
-    opacity: 0;
-  }
-
-  #loader .loader-bar {
-    width: 200px;
-    height: 1px;
-    background: rgba(255,255,255,0.15);
-    position: relative;
-    overflow: hidden;
-  }
-
-  #loader .loader-progress {
-    position: absolute;
-    inset: 0;
-    background: var(--caramel);
-    transform: scaleX(0);
-    transform-origin: left;
-  }
-
-  /* Nav */
-  nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    padding: 1.5rem 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    mix-blend-mode: normal;
-  }
-
-  nav::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(250, 247, 242, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(26,15,10,0.06);
-  }
-
-  .nav-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    letter-spacing: 0.25em;
-    color: var(--espresso);
-    position: relative;
-    text-decoration: none;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 2.5rem;
-    list-style: none;
-    position: relative;
-  }
-
-  .nav-links a {
-    font-size: 0.75rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--espresso);
-    text-decoration: none;
-    position: relative;
-    opacity: 0.7;
-    transition: opacity 0.3s;
-  }
-
-  .nav-links a::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: var(--caramel);
-    transition: width 0.4s ease;
-  }
-
-  .nav-links a:hover { opacity: 1; }
-  .nav-links a:hover::after { width: 100%; }
-
-  .nav-cta {
-    position: relative;
-    font-size: 0.72rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--milk);
-    background: var(--espresso);
-    padding: 0.65rem 1.6rem;
-    text-decoration: none;
-    transition: background 0.3s;
-  }
-
-  .nav-cta:hover { background: var(--mocha); }
-
-  /* Hero */
-  #hero {
-    min-height: 100vh;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    padding: 0 3rem 5rem;
-    overflow: hidden;
-  }
-
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    background: var(--espresso);
-  }
-
-  .hero-grain {
-    position: absolute;
-    inset: 0;
-    opacity: 0.03;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 200px;
-  }
-
-  .hero-number {
-    position: absolute;
-    top: 12vh;
-    right: 3rem;
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(8rem, 20vw, 18rem);
-    color: rgba(255,255,255,0.04);
-    line-height: 1;
-    font-style: italic;
-    user-select: none;
-  }
-
-  .hero-tag {
-    position: absolute;
-    top: 10.5rem;
-    left: 3rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--caramel);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    opacity: 0;
-  }
-
-  .hero-tag::before {
-    content: '';
-    width: 2.5rem;
-    height: 1px;
-    background: var(--caramel);
-  }
-
-  .hero-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(3.5rem, 10vw, 9rem);
-    line-height: 0.92;
-    color: var(--cream);
-    position: relative;
-    z-index: 1;
-    max-width: 80vw;
-  }
-
-  .hero-title em {
-    font-style: italic;
-    color: var(--latte);
-  }
-
-  .hero-scroll-hint {
-    position: absolute;
-    bottom: 2rem;
-    right: 3rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
-    writing-mode: vertical-rl;
-    opacity: 0;
-  }
-
-  .hero-scroll-hint::after {
-    content: '';
-    width: 1px;
-    height: 3rem;
-    background: rgba(255,255,255,0.2);
-  }
-
-  /* About strip */
-  #about-strip {
-    background: var(--caramel);
-    padding: 1.2rem 3rem;
-    display: flex;
-    align-items: center;
-    gap: 3rem;
-    overflow: hidden;
-  }
-
-  .strip-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .strip-item span {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--milk);
-  }
-
-  .strip-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.4);
-  }
-
-  /* Section header */
-  .section-tag {
-    font-size: 0.68rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--caramel);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .section-tag::before {
-    content: '';
-    width: 2rem;
-    height: 1px;
-    background: var(--caramel);
-  }
-
-  /* Story section */
-  #story {
-    padding: 8rem 3rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6rem;
-    align-items: center;
-  }
-
-  .story-img-wrap {
-    position: relative;
-    aspect-ratio: 4/5;
-    overflow: hidden;
-  }
-
-  .story-img-placeholder {
-    width: 100%;
-    height: 100%;
-    background: #C8C4BC;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .story-img-placeholder span {
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    color: #8A8278;
-    text-transform: uppercase;
-  }
-
-  .story-img-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40%;
-    background: linear-gradient(to top, rgba(26,15,10,0.3), transparent);
-  }
-
-  .story-accent {
-    position: absolute;
-    bottom: -1rem;
-    right: -1rem;
-    width: 60%;
-    aspect-ratio: 1;
-    background: var(--caramel);
-    z-index: -1;
-  }
-
-  .story-text h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.2rem, 4vw, 3.5rem);
-    line-height: 1.15;
-    margin-bottom: 2rem;
-    color: var(--espresso);
-  }
-
-  .story-text p {
-    font-size: 1rem;
-    line-height: 1.85;
-    color: var(--ash);
-    margin-bottom: 1.5rem;
-    max-width: 44ch;
-  }
-
-  .story-stats {
-    display: flex;
-    gap: 3rem;
-    margin-top: 3rem;
-    padding-top: 2.5rem;
-    border-top: 1px solid rgba(26,15,10,0.1);
-  }
-
-  .stat-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 3rem;
-    font-weight: 400;
-    color: var(--espresso);
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--ash);
-    margin-top: 0.5rem;
-  }
-
-  /* Menu */
-  #menu {
-    padding: 6rem 3rem 8rem;
-    background: var(--espresso);
-  }
-
-  .menu-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 4rem;
-  }
-
-  .menu-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.5rem, 6vw, 5rem);
-    color: var(--cream);
-    line-height: 1.05;
-  }
-
-  .menu-title em { font-style: italic; color: var(--latte); }
-
-  .menu-filter {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .filter-btn {
-    font-size: 0.68rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    padding: 0.5rem 1.2rem;
-    border: 1px solid rgba(255,255,255,0.15);
-    background: transparent;
-    color: rgba(255,255,255,0.5);
-    cursor: none;
-    transition: all 0.3s;
-  }
-
-  .filter-btn:hover,
-  .filter-btn.active {
-    background: var(--caramel);
-    border-color: var(--caramel);
-    color: var(--milk);
-  }
-
-  /* Menu Grid */
-  .menu-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: rgba(255,255,255,0.06);
-  }
-
-  .menu-card {
-    background: var(--espresso);
-    padding: 2rem;
-    position: relative;
-    overflow: hidden;
-    transition: background 0.4s;
-    cursor: none;
-  }
-
-  .menu-card:hover {
-    background: var(--mocha);
-  }
-
-  .menu-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: rgba(255,255,255,0.06);
-  }
-
-  .card-photo {
-    width: 100%;
-    aspect-ratio: 4/3;
-    background: #2A1A10;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 0.4rem;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-
-  .menu-card:hover .card-photo {
-    transform: scale(1.03);
-  }
-
-  .card-photo-text {
-    font-size: 0.62rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.2);
-  }
-
-  .card-photo-icon {
-    width: 28px;
-    height: 28px;
-    opacity: 0.15;
-  }
-
-  .card-number {
-    position: absolute;
-    top: 0.75rem;
-    left: 0.75rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    color: rgba(255,255,255,0.2);
-    font-family: 'Inter', sans-serif;
-  }
-
-  .card-tag {
-    font-size: 0.6rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--caramel);
-    margin-bottom: 0.5rem;
-  }
-
-  .card-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.2rem;
-    color: var(--cream);
-    margin-bottom: 0.5rem;
-    line-height: 1.2;
-  }
-
-  .card-desc {
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.35);
-    line-height: 1.6;
-    margin-bottom: 1.25rem;
-  }
-
-  .card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .card-price {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    color: var(--latte);
-  }
-
-  .card-order {
-    font-size: 0.62rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
-    border: 1px solid rgba(255,255,255,0.12);
-    padding: 0.4rem 0.9rem;
-    transition: all 0.3s;
-  }
-
-  .menu-card:hover .card-order {
-    color: var(--caramel);
-    border-color: var(--caramel);
-  }
-
-  /* Featured / parallax section */
-  #featured {
-    height: 70vh;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .featured-bg {
-    position: absolute;
-    inset: -20%;
-    background: var(--mocha);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .featured-photo-placeholder {
-    width: 100%;
-    height: 100%;
-    background: #2D1A10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .featured-photo-placeholder span {
-    font-size: 0.75rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.15);
-  }
-
-  .featured-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(26,15,10,0.6);
-  }
-
-  .featured-content {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-  }
-
-  .featured-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: var(--caramel);
-    margin-bottom: 1.5rem;
-  }
-
-  .featured-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.5rem, 7vw, 6rem);
-    color: var(--cream);
-    line-height: 1.05;
-    margin-bottom: 2rem;
-  }
-
-  .featured-title em { font-style: italic; color: var(--latte); }
-
-  .featured-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--cream);
-    border: 1px solid rgba(255,255,255,0.3);
-    padding: 0.9rem 2.5rem;
-    text-decoration: none;
-    transition: all 0.4s;
-  }
-
-  .featured-cta::after {
-    content: '→';
-    transition: transform 0.3s;
-  }
-
-  .featured-cta:hover {
-    background: var(--caramel);
-    border-color: var(--caramel);
-  }
-
-  .featured-cta:hover::after { transform: translateX(4px); }
-
-  /* Testimonials */
-  #testimonials {
-    padding: 8rem 3rem;
-    background: var(--cream);
-  }
-
-  .testimonials-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    margin-top: 4rem;
-  }
-
-  .testimonial-card {
-    padding: 2.5rem;
-    border: 1px solid rgba(26,15,10,0.1);
-    position: relative;
-  }
-
-  .testimonial-quote {
-    font-family: 'Playfair Display', serif;
-    font-size: 3rem;
-    color: var(--caramel);
-    line-height: 1;
-    margin-bottom: 1rem;
-  }
-
-  .testimonial-text {
-    font-size: 0.95rem;
-    line-height: 1.8;
-    color: var(--ash);
-    margin-bottom: 2rem;
-    font-style: italic;
-    font-family: 'Playfair Display', serif;
-  }
-
-  .testimonial-author {
-    font-size: 0.72rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--espresso);
-  }
-
-  .testimonial-role {
-    font-size: 0.68rem;
-    color: var(--ash);
-    margin-top: 0.3rem;
-  }
-
-  /* Footer */
-  footer {
-    background: var(--espresso);
-    padding: 5rem 3rem 2rem;
-  }
-
-  .footer-top {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 4rem;
-    padding-bottom: 4rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .footer-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    letter-spacing: 0.25em;
-    color: var(--cream);
-    margin-bottom: 1.5rem;
-  }
-
-  .footer-tagline {
-    font-size: 0.9rem;
-    color: rgba(255,255,255,0.35);
-    line-height: 1.7;
-    max-width: 28ch;
-    margin-bottom: 2rem;
-  }
-
-  .footer-social {
-    display: flex;
-    gap: 1rem;
-  }
-
-  .footer-social a {
-    width: 36px;
-    height: 36px;
-    border: 1px solid rgba(255,255,255,0.12);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255,255,255,0.4);
-    text-decoration: none;
-    font-size: 0.7rem;
-    transition: all 0.3s;
-  }
-
-  .footer-social a:hover {
-    border-color: var(--caramel);
-    color: var(--caramel);
-  }
-
-  .footer-heading {
-    font-size: 0.68rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 1.5rem;
-  }
-
-  .footer-links {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .footer-links a {
-    font-size: 0.88rem;
-    color: rgba(255,255,255,0.5);
-    text-decoration: none;
-    transition: color 0.3s;
-  }
-
-  .footer-links a:hover { color: var(--latte); }
-
-  .footer-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 2rem;
-  }
-
-  .footer-copy {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.2);
-    letter-spacing: 0.1em;
-  }
-
-  /* Clip reveal utility */
-  .clip-reveal {
-    clip-path: inset(0 0 100% 0);
-  }
-
-  /* Marquee */
-  .marquee-wrap {
-    overflow: hidden;
-    position: relative;
-  }
-
-  .marquee-track {
-    display: flex;
-    gap: 3rem;
-    will-change: transform;
-  }
-
-  /* Number counter */
-  .counter { font-variant-numeric: tabular-nums; }
-
-  /* Horizontal scroll section label */
-  .section-label-vertical {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%) rotate(-90deg);
-    font-size: 0.62rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.2);
-    white-space: nowrap;
-    transform-origin: left center;
-  }
-
-  /* Scroll line */
-  .progress-line {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 2px;
-    background: var(--caramel);
-    z-index: 200;
-    transform-origin: left;
-    transform: scaleX(0);
-  }
-
-  /* SVG Coffee Icon */
-  .coffee-svg {
-    width: 40px;
-    height: 40px;
-    opacity: 0.12;
-  }
-
-  @media (max-width: 1024px) {
-    .menu-grid { grid-template-columns: repeat(2, 1fr); }
-    #story { grid-template-columns: 1fr; }
-    .footer-top { grid-template-columns: 1fr 1fr; }
-    .testimonials-grid { grid-template-columns: 1fr 1fr; }
-  }
-
-  @media (max-width: 640px) {
-    nav { padding: 1rem 1.5rem; }
-    .nav-links { display: none; }
-    #hero { padding: 0 1.5rem 4rem; }
-    .menu-grid { grid-template-columns: 1fr; }
-    #story, #menu, #testimonials { padding: 4rem 1.5rem; }
-    .hero-number { display: none; }
-    .testimonials-grid { grid-template-columns: 1fr; }
-    .footer-top { grid-template-columns: 1fr; gap: 2rem; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Утречкофф — Неоновая кофейня нового поколения</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkTeal: '#041619',     /* Глубокий темно-бирюзовый фон */
+                        cardTeal: '#072327',     /* Цвет плашек меню */
+                        neonTeal: '#00f2fe',     /* Яркая неоновая подсветка */
+                        coralRed: '#ff4b5c',     /* Контрастный кораллово-красный для CTA */
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        neonGlow: '0 0 15px rgba(0, 242, 254, 0.35)',
+                        coralGlow: '0 0 20px rgba(255, 75, 92, 0.5)',
+                        cardGlow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body, html {
+            background-color: #041619;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        /* Скрытие полосы прокрутки для нативности Lenis */
+        html.lenis {
+            height: auto;
+        }
+        .lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        /* Эффект неоновой вывески */
+        .neon-text-glow {
+            text-shadow: 0 0 8px rgba(0, 242, 254, 0.6);
+        }
+        .coral-text-glow {
+            text-shadow: 0 0 8px rgba(255, 75, 92, 0.6);
+        }
+        /* Кастомный скроллбар */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #041619;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #072327;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f2fe;
+        }
+        /* Корректная работа SplitType до инициализации */
+        .reveal-text {
+            opacity: 0;
+        }
+        .reveal-text.split-ready {
+            opacity: 1;
+        }
+        .char {
+            display: inline-block;
+        }
+    </style>
 </head>
-<body>
+<body data-barba="wrapper" class="text-gray-100 antialiased font-sans selection:bg-neonTeal selection:text-darkTeal">
 
-<!-- Progress Bar -->
-<div class="progress-line" id="progressLine"></div>
+    <div data-barba="container" data-barba-namespace="home">
+        
+        <header class="fixed top-0 left-0 w-full z-50 bg-darkTeal/80 backdrop-blur-md border-b border-neonTeal/10 px-6 py-4">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <a href="#" class="font-display text-2xl font-extrabold text-neonTeal tracking-wider neon-text-glow">
+                    УТРЕЧКОФФ<span class="text-coralRed">.</span>
+                </a>
+                <nav class="hidden md:flex space-x-8 text-sm font-semibold tracking-widest uppercase">
+                    <a href="#menu" class="hover:text-neonTeal transition-colors duration-300">Меню</a>
+                    <a href="#about" class="hover:text-neonTeal transition-colors duration-300">О нас</a>
+                    <a href="#footer" class="hover:text-neonTeal transition-colors duration-300">Контакты</a>
+                </nav>
+                <a href="#menu" class="bg-coralRed text-white px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase shadow-coralGlow hover:scale-105 transition-transform duration-300">
+                    Заказать онлайн
+                </a>
+            </div>
+        </header>
 
-<!-- Custom Cursor -->
-<div class="cursor" id="cursor"></div>
-<div class="cursor-follower" id="cursorFollower"></div>
+        <section class="relative min-h-screen flex items-center justify-center pt-24 px-4 overflow-hidden">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-neonTeal/5 rounded-full filter blur-[100px] pointer-events-none"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-coralRed/5 rounded-full filter blur-[100px] pointer-events-none"></div>
 
-<!-- Loader -->
-<div id="loader">
-  <div class="loader-logo">MOKA</div>
-  <div class="loader-bar">
-    <div class="loader-progress" id="loaderProgress"></div>
-  </div>
-</div>
+            <div class="max-w-5xl mx-auto text-center z-10">
+                <span class="text-coralRed uppercase font-bold tracking-widest text-sm inline-block mb-4 coral-text-glow">⚡ Энергия твоего города</span>
+                <h1 class="reveal-text font-display text-5xl md:text-8xl font-black tracking-tighter leading-none text-white mb-6 uppercase">
+                    Атмосфера <br><span class="text-neonTeal neon-text-glow">чистого вкуса</span>
+                </h1>
+                <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 font-light leading-relaxed">
+                    Премиальные кофейные миксы, концептуальный Бабл Ти и незабываемые шейки в самом футуристичном заведении.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <a href="#menu" class="w-full sm:w-auto bg-neonTeal text-darkTeal font-bold px-8 py-4 rounded-xl shadow-neonGlow hover:bg-white transition-all duration-300 uppercase tracking-wider text-sm">
+                        Открыть меню кофейни
+                    </a>
+                </div>
+            </div>
+        </section>
 
-<!-- Navigation -->
-<nav>
-  <a href="#" class="nav-logo">MOKA</a>
-  <ul class="nav-links">
-    <li><a href="#story">О нас</a></li>
-    <li><a href="#menu">Меню</a></li>
-    <li><a href="#testimonials">Отзывы</a></li>
-    <li><a href="#">Локации</a></li>
-  </ul>
-  <a href="#" class="nav-cta">Заказать</a>
-</nav>
+        <main id="menu" class="max-w-7xl mx-auto px-4 py-24">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+                <div>
+                    <span class="text-neonTeal font-mono text-sm tracking-widest block mb-2">// THE MENU //</span>
+                    <h2 class="font-display text-4xl md:text-6xl font-extrabold uppercase text-white">Карта напитков</h2>
+                </div>
+                <p class="text-gray-400 max-w-md font-light text-sm md:text-base">
+                    Используйте фильтрацию или прокрутите вниз, чтобы изучить наши авторские шедевры и классику.
+                </p>
+            </div>
 
-<!-- Hero -->
-<section id="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grain"></div>
-  <div class="hero-number">20</div>
+            <div class="space-y-20">
 
-  <div class="hero-tag" id="heroTag">
-    Specialty Coffee · Est. 2019
-  </div>
+                <div>
+                    <h3 class="font-display text-2xl md:text-3xl font-bold text-neonTeal mb-8 pb-3 border-b border-neonTeal/20 uppercase tracking-wide">
+                        Бабл Ти и Чайные напитки
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 tracking-widest uppercase">ФОТО</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Финиковый Бабл Ти</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: финики, тапиока</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">250 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">260 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">270 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 tracking-widest uppercase">ФОТО</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Грязный Джо</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: тапиока, черный чай, сливочная пенка</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">250 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">260 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">270 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 tracking-widest uppercase">ФОТО</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Манго-Маракуйя Бабл Ти</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: чай, тапиока, сиропы</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">300 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 tracking-widest uppercase">ФОТО</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Апельсин Маракуйя Айс Ти</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: апельсин, пюре маракуйи, натуральный чай</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">300 сом</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-  <div class="hero-content">
-    <h1 class="hero-title" id="heroTitle">
-      Искусство<br><em>идеального</em><br>кофе
-    </h1>
-  </div>
+                <div>
+                    <h3 class="font-display text-2xl md:text-3xl font-bold text-neonTeal mb-8 pb-3 border-b border-neonTeal/20 uppercase tracking-wide">
+                        Матча напитки
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 tracking-widest uppercase">ФОТО</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Аис Матча</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: матча, лед, молоко</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">270 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">290 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 tracking-widest uppercase">ФОТО</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Матча Манго</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: матча, пюре манго, молоко</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">300 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 tracking-widest uppercase">ФОТО</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Матча Банан</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: банановое пюре, матча, кокосовые гранулы</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">300 сом</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-  <div class="hero-scroll-hint" id="heroScroll">Scroll</div>
-</section>
+                <div>
+                    <h3 class="font-display text-2xl md:text-3xl font-bold text-neonTeal mb-8 pb-3 border-b border-neonTeal/20 uppercase tracking-wide">
+                        Шейки
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 tracking-widest uppercase">ФОТО</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Ягодный Шейк</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: ягоды, молоко, мороженое</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">300 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 tracking-widest uppercase">ФОТО</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Орео Бабл Шейк</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: орео, тапиока, мороженое</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">300 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">310 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">320 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 tracking-widest uppercase">ФОТО</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Банановый Бабл Шейк</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: натуральный банан, тапиока, мороженое</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">300 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">310 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">320 сом</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-<!-- Strip -->
-<div id="about-strip">
-  <div class="marquee-wrap" style="flex: 1; overflow: hidden;">
-    <div class="marquee-track" id="marqueeTrack">
-      <div class="strip-item"><span>Specialty Coffee</span><div class="strip-dot"></div></div>
-      <div class="strip-item"><span>Single Origin</span><div class="strip-dot"></div></div>
-      <div class="strip-item"><span>Hand-crafted Drinks</span><div class="strip-dot"></div></div>
-      <div class="strip-item"><span>Direct Trade</span><div class="strip-dot"></div></div>
-      <div class="strip-item"><span>Свежеобжаренные зёрна</span><div class="strip-dot"></div></div>
-      <div class="strip-item"><span>Авторские напитки</span><div class="strip-dot"></div></div>
-      <div class="strip-item"><span>Specialty Coffee</span><div class="strip-dot"></div></div>
-      <div class="strip-item"><span>Single Origin</span><div class="strip-dot"></div></div>
-      <div class="strip-item"><span>Hand-crafted Drinks</span><div class="strip-dot"></div></div>
-      <div class="strip-item"><span>Direct Trade</span><div class="strip-dot"></div></div>
+                <div>
+                    <h3 class="font-display text-2xl md:text-3xl font-bold text-neonTeal mb-8 pb-3 border-b border-neonTeal/20 uppercase tracking-wide">
+                        Смузи
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400 tracking-widest uppercase">ФОТО [image_2.png]</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Тропический смузи</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: маракуйя, манго, лёд</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">250 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">260 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">270 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400 tracking-widest uppercase">ФОТО [image_8.png]</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Ягодный смузи</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: ягоды, минералка, лёд</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">300 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400 tracking-widest uppercase">ФОТО [image_9.png]</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Виноградный смузи</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: виноград, минералка, лёд</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">250 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">260 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">270 сом</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-display text-2xl md:text-3xl font-bold text-coralRed mb-8 pb-3 border-b border-coralRed/20 uppercase tracking-wide coral-text-glow">
+                        Фирменные напитки и миксы
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-cardTeal/90 rounded-2xl p-5 border border-coralRed/20 shadow-coralGlow/10 hover:border-coralRed/50 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-900 to-red-950 flex items-center justify-center text-xs font-bold text-coralRed/60 tracking-widest uppercase">ФОТО [image.png]</div>
+                                </div>
+                                <span class="bg-coralRed text-white text-[10px] uppercase px-2 py-0.5 rounded font-extrabold tracking-widest mb-2 inline-block">Best Seller</span>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-coralRed transition-colors">Red Dragon</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: клубника, тапиока, матча</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-coralRed">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-coralRed">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-coralRed">300 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400 tracking-widest uppercase">ФОТО [image_3.png]</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Заводной ананас</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: ананас, энергия, настроение</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">250 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">260 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">270 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400 tracking-widest uppercase">ФОТО [image_4.png]</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Вишневый бум</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: натуральная вишня, сырная пенка, шоколадные шарики</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">300 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400 tracking-widest uppercase">ФОТО [image_5.png]</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Клубника со сливками</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: клубника, сырная пенка</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">300 сом</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-display text-2xl md:text-3xl font-bold text-neonTeal mb-8 pb-3 border-b border-neonTeal/20 uppercase tracking-wide">
+                        Матча и Таро
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400 tracking-widest uppercase">ФОТО [image_6.png]</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Матча Клубника</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: матча, клубничный джем, молоко</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">300 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400 tracking-widest uppercase">ФОТО [image_7.png]</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Матча-Таро</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: матча, таро, лёд</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">290 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">300 сом</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-cardTeal rounded-2xl p-5 border border-white/5 shadow-cardGlow hover:border-neonTeal/30 transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="photo-placeholder w-full h-48 bg-gray-800/60 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center border border-white/5">
+                                    <div class="photo-inner absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400 tracking-widest uppercase">ФОТО [image_10.png]</div>
+                                </div>
+                                <h4 class="font-bold text-lg text-white mb-1 group-hover:text-neonTeal transition-colors">Таро</h4>
+                                <p class="text-xs text-gray-400 font-light mb-4">Состав: таро, кокосовые гранулы</p>
+                            </div>
+                            <div class="space-y-1.5 pt-3 border-t border-white/5 text-sm font-semibold text-gray-300">
+                                <div class="flex justify-between"><span>400 мл</span><span class="text-neonTeal">270 сом</span></div>
+                                <div class="flex justify-between"><span>500 мл</span><span class="text-neonTeal">280 сом</span></div>
+                                <div class="flex justify-between"><span>700 мл</span><span class="text-neonTeal">290 сом</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-display text-2xl md:text-3xl font-bold text-neonTeal mb-8 pb-3 border-b border-neonTeal/20 uppercase tracking-wide">
+                        Лимонады и Мохито
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-cardTeal rounded-xl p-5 border border-white/5 flex items-center justify-between gap-4 group hover:border-neonTeal/30 transition-colors">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-white group-hover:text-neonTeal transition-colors">Виноградный лимонад</h4>
+                                <span class="text-xs text-gray-500 block mb-2">Ref: image.png</span>
+                                <div class="text-xs text-gray-300 space-y-0.5">
+                                    <div class="flex justify-between max-w-[150px]"><span>400мл</span><span class="text-neonTeal">200 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>500мл</span><span class="text-neonTeal">210 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>700мл</span><span class="text-neonTeal">220 сом</span></div>
+                                </div>
+                            </div>
+                            <div class="photo-placeholder w-24 h-24 bg-gray-800 rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center text-[10px] font-bold text-gray-600">ФОТО</div>
+                        </div>
+                        <div class="bg-cardTeal rounded-xl p-5 border border-white/5 flex items-center justify-between gap-4 group hover:border-neonTeal/30 transition-colors">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-white group-hover:text-neonTeal transition-colors">Цитрусовый лимонад</h4>
+                                <span class="text-xs text-gray-500 block mb-2">Ref: image_2.png</span>
+                                <div class="text-xs text-gray-300 space-y-0.5">
+                                    <div class="flex justify-between max-w-[150px]"><span>400мл</span><span class="text-neonTeal">200 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>500мл</span><span class="text-neonTeal">210 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>700мл</span><span class="text-neonTeal">220 сом</span></div>
+                                </div>
+                            </div>
+                            <div class="photo-placeholder w-24 h-24 bg-gray-800 rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center text-[10px] font-bold text-gray-600">ФОТО</div>
+                        </div>
+                        <div class="bg-cardTeal rounded-xl p-5 border border-white/5 flex items-center justify-between gap-4 group hover:border-neonTeal/30 transition-colors">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-white group-hover:text-neonTeal transition-colors">Тропический лимонад</h4>
+                                <span class="text-xs text-gray-500 block mb-2">Ref: image_6.png</span>
+                                <div class="text-xs text-gray-300 space-y-0.5">
+                                    <div class="flex justify-between max-w-[150px]"><span>400мл</span><span class="text-neonTeal">200 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>500мл</span><span class="text-neonTeal">210 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>700мл</span><span class="text-neonTeal">220 сом</span></div>
+                                </div>
+                            </div>
+                            <div class="photo-placeholder w-24 h-24 bg-gray-800 rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center text-[10px] font-bold text-gray-600">ФОТО</div>
+                        </div>
+                        <div class="bg-cardTeal rounded-xl p-5 border border-white/5 flex items-center justify-between gap-4 group hover:border-neonTeal/30 transition-colors">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-white group-hover:text-neonTeal transition-colors">Ягодный лимонад</h4>
+                                <span class="text-xs text-gray-500 block mb-2">Ref: image_7.png</span>
+                                <div class="text-xs text-gray-300 space-y-0.5">
+                                    <div class="flex justify-between max-w-[150px]"><span>400мл</span><span class="text-neonTeal">200 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>500мл</span><span class="text-neonTeal">210 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>700мл</span><span class="text-neonTeal">220 сом</span></div>
+                                </div>
+                            </div>
+                            <div class="photo-placeholder w-24 h-24 bg-gray-800 rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center text-[10px] font-bold text-gray-600">ФОТО</div>
+                        </div>
+                        <div class="bg-cardTeal rounded-xl p-5 border border-white/5 flex items-center justify-between gap-4 group hover:border-neonTeal/30 transition-colors">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-white group-hover:text-neonTeal transition-colors">Грейпфрут Клубника лимонад</h4>
+                                <span class="text-xs text-gray-500 block mb-2">Ref: image_3.png</span>
+                                <div class="text-xs text-gray-300 space-y-0.5">
+                                    <div class="flex justify-between max-w-[150px]"><span>400мл</span><span class="text-neonTeal">200 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>500мл</span><span class="text-neonTeal">210 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>700мл</span><span class="text-neonTeal">220 сом</span></div>
+                                </div>
+                            </div>
+                            <div class="photo-placeholder w-24 h-24 bg-gray-800 rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center text-[10px] font-bold text-gray-600">ФОТО</div>
+                        </div>
+                        <div class="bg-cardTeal rounded-xl p-5 border border-white/5 flex items-center justify-between gap-4 group hover:border-neonTeal/30 transition-colors">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-white group-hover:text-neonTeal transition-colors">Мохито</h4>
+                                <span class="text-xs text-gray-500 block mb-2">Ref: image_5.png</span>
+                                <div class="text-xs text-gray-300 space-y-0.5">
+                                    <div class="flex justify-between max-w-[150px]"><span>400мл</span><span class="text-neonTeal">220 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>500мл</span><span class="text-neonTeal">230 сом</span></div>
+                                    <div class="flex justify-between max-w-[150px]"><span>700мл</span><span class="text-neonTeal">240 сом</span></div>
+                                </div>
+                            </div>
+                            <div class="photo-placeholder w-24 h-24 bg-gray-800 rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center text-[10px] font-bold text-gray-600">ФОТО</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-neonTeal mb-6 uppercase tracking-wider border-b border-neonTeal/20 pb-2">Холодный кофе & Бамбл</h3>
+                        <div class="space-y-6">
+                            <div class="bg-cardTeal/50 p-4 rounded-xl border border-white/5">
+                                <span class="text-[10px] text-gray-500 block mb-1">Холодный кофе [image_10.png]</span>
+                                <h4 class="font-bold text-white mb-2">Айс Американо со льдом</h4>
+                                <div class="flex justify-between text-sm text-gray-300"><span>500 мл — <span class="text-neonTeal">180 сом</span></span><span>700 мл — <span class="text-neonTeal">190 сом</span></span></div>
+                            </div>
+                            <div class="bg-cardTeal/50 p-4 rounded-xl border border-white/5">
+                                <span class="text-[10px] text-neonTeal block mb-1">Бамбл Кофе (Эспрессо, лёд, сок)</span>
+                                <h4 class="font-bold text-white mb-2">Гранатовый Бамбл</h4>
+                                <div class="flex justify-between text-sm text-gray-300"><span>500 мл — <span class="text-neonTeal">240 сом</span></span><span>700 мл — <span class="text-neonTeal">260 сом</span></span></div>
+                            </div>
+                            <div class="bg-cardTeal/50 p-4 rounded-xl border border-white/5">
+                                <span class="text-[10px] text-neonTeal block mb-1">Бамбл Кофе (Эспрессо, лёд, сок)</span>
+                                <h4 class="font-bold text-white mb-2">Апельсиновый Бамбл</h4>
+                                <div class="flex justify-between text-sm text-gray-300"><span>500 мл — <span class="text-neonTeal">240 сом</span></span><span>700 мл — <span class="text-neonTeal">260 сом</span></span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-neonTeal mb-6 uppercase tracking-wider border-b border-neonTeal/20 pb-2">Айс Латте</h3>
+                        <div class="space-y-6">
+                            <div class="bg-cardTeal/50 p-4 rounded-xl border border-white/5">
+                                <span class="text-[10px] text-gray-500 block mb-1">Эспрессо, лёд, молоко</span>
+                                <h4 class="font-bold text-white mb-2">Классический Айс Латте</h4>
+                                <div class="flex justify-between text-sm text-gray-300"><span>500 мл — <span class="text-neonTeal">230 сом</span></span><span>700 мл — <span class="text-neonTeal">240 сом</span></span></div>
+                            </div>
+                            <div class="bg-cardTeal/50 p-4 rounded-xl border border-white/5">
+                                <span class="text-[10px] text-gray-500 block mb-1">Эспрессо, тапиока, лёд</span>
+                                <h4 class="font-bold text-white mb-2">Айс Латте с тапиокой</h4>
+                                <div class="flex justify-between text-sm text-gray-300"><span>500 мл — <span class="text-neonTeal">250 сом</span></span><span>700 мл — <span class="text-neonTeal">260 сом</span></span></div>
+                            </div>
+                            <div class="bg-cardTeal/50 p-4 rounded-xl border border-white/5">
+                                <span class="text-[10px] text-gray-500 block mb-1">Эспрессо, джусболы, орео</span>
+                                <h4 class="font-bold text-white mb-2">Айс Латте Орео</h4>
+                                <div class="flex justify-between text-sm text-gray-300"><span>500 мл — <span class="text-neonTeal">250 сом</span></span><span>700 мл — <span class="text-neonTeal">260 сом</span></span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-coralRed mb-6 uppercase tracking-wider border-b border-coralRed/20 pb-2 coral-text-glow">Signature Coffee</h3>
+                        <div class="space-y-6">
+                            <div class="bg-cardTeal/50 p-4 rounded-xl border border-coralRed/20">
+                                <span class="text-[10px] text-gray-500 block mb-1">Эспрессо, лёд, тоник</span>
+                                <h4 class="font-bold text-white mb-2">Эспрессо Тоник</h4>
+                                <div class="flex justify-between text-sm text-gray-300"><span>500 мл — <span class="text-coralRed">240 сом</span></span><span>700 мл — <span class="text-coralRed">260 сом</span></span></div>
+                            </div>
+                            <div class="bg-cardTeal/50 p-4 rounded-xl border border-coralRed/20">
+                                <span class="text-[10px] text-gray-500 block mb-1">Эспрессо, тапиока, финики</span>
+                                <h4 class="font-bold text-white mb-2 text-xs md:text-sm lg:text-base">Бананово-Финиковый Капучино</h4>
+                                <div class="flex justify-between text-sm text-gray-300 mt-2"><span>500 мл — <span class="text-coralRed">310 сом</span></span><span>700 мл — <span class="text-coralRed">320 сом</span></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 pt-10">
+                    
+                    <div class="bg-cardTeal rounded-3xl p-6 md:p-8 border border-white/5 shadow-cardGlow">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-display text-2xl font-bold text-white uppercase">Горячие напитки</h3>
+                            <span class="text-xs text-gray-500 font-mono">image.png</span>
+                        </div>
+                        <div class="space-y-4 divide-y divide-white/5 text-sm md:text-base">
+                            <div class="flex justify-between pt-3"><span class="text-gray-300">Эспрессо</span><span class="text-neonTeal font-bold">150 сом</span></div>
+                            <div class="flex justify-between pt-3"><span class="text-gray-300">Американо</span><span class="text-neonTeal font-bold">180 / 200 сом</span></div>
+                            <div class="flex justify-between pt-3"><span class="text-gray-300">Латте</span><span class="text-neonTeal font-bold">220 сом</span></div>
+                            <div class="flex justify-between pt-3"><span class="text-gray-300">Капучино</span><span class="text-neonTeal font-bold">220 / 240 сом</span></div>
+                            <div class="flex justify-between pt-3"><span class="text-gray-300">Флэт уайт</span><span class="text-neonTeal font-bold">200 сом</span></div>
+                            <div class="flex justify-between pt-3"><span class="text-gray-300">Какао</span><span class="text-neonTeal font-bold">180 / 200 сом</span></div>
+                            <div class="flex justify-between pt-3"><span class="text-gray-300">Горячий шоколад</span><span class="text-neonTeal font-bold">220 / 240 сом</span></div>
+                            <div class="flex justify-between pt-3"><span class="text-gray-300">Раф (классический, медовый)</span><span class="text-neonTeal font-bold">300 / 350 сом</span></div>
+                            <div class="flex justify-between pt-3"><span class="text-gray-300">Матча латте</span><span class="text-neonTeal font-bold">230 / 250 сом</span></div>
+                            <div class="flex justify-between pt-3"><span class="text-gray-300">Кофе на безлактозном молоке</span><span class="text-neonTeal font-bold">280 / 300 сом</span></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-cardTeal rounded-3xl p-6 md:p-8 border border-white/5 shadow-cardGlow flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="font-display text-2xl font-bold text-white uppercase">Горячие чаи</h3>
+                                <span class="text-xs text-gray-500 font-mono">image_2.png</span>
+                            </div>
+                            
+                            <h4 class="text-xs text-coralRed font-bold tracking-widest uppercase mb-3">Фирменные чаи</h4>
+                            <div class="space-y-4 divide-y divide-white/5 mb-8 text-sm md:text-base">
+                                <div class="flex justify-between pt-3"><span class="text-gray-300">Цитрусовый</span><span class="text-neonTeal font-bold">160 / 180 сом</span></div>
+                                <div class="flex justify-between pt-3"><span class="text-gray-300">Ягодный</span><span class="text-neonTeal font-bold">160 / 180 сом</span></div>
+                                <div class="flex justify-between pt-3"><span class="text-gray-300">Имбирный</span><span class="text-neonTeal font-bold">160 / 180 сом</span></div>
+                            </div>
+
+                            <h4 class="text-xs text-gray-400 font-bold tracking-widest uppercase mb-3">Чай без заморочек</h4>
+                            <div class="space-y-4 divide-y divide-white/5 text-sm md:text-base">
+                                <div class="flex justify-between pt-3"><span class="text-gray-300">Черный</span><span class="text-neonTeal font-bold">80 / 100 сом</span></div>
+                                <div class="flex justify-between pt-3"><span class="text-gray-300">Зеленый</span><span class="text-neonTeal font-bold">80 / 100 сом</span></div>
+                                <div class="flex justify-between pt-3"><span class="text-gray-300">Жасминовый</span><span class="text-neonTeal font-bold">80 / 100 сом</span></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-white/5 text-center">
+                            <p class="text-xs text-gray-500 italic">Все цены указаны в сомах. Уточняйте наличие альтернативного молока у бариста.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+
+        <footer id="footer" class="bg-black/40 border-t border-white/5 py-12 px-4 text-center text-sm text-gray-500">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="font-display font-extrabold text-neonTeal tracking-widest">УТРЕЧКОФФ © 2026</p>
+                <p class="font-light">Разработано по гайдлайнам премиального интерактивного дизайна AWWRDS.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-neonTeal transition-colors">Instagram</a>
+                    <a href="#" class="hover:text-neonTeal transition-colors">Telegram</a>
+                </div>
+            </div>
+        </footer>
+
     </div>
-  </div>
-</div>
 
-<!-- Story -->
-<section id="story">
-  <div class="story-img-wrap" data-parallax>
-    <div class="story-img-placeholder">
-      <svg class="coffee-svg" viewBox="0 0 64 64" fill="none">
-        <path d="M16 20h32l-4 24H20L16 20z" stroke="#8A8278" stroke-width="1.5"/>
-        <path d="M48 26c4 0 8 2 8 6s-4 6-8 6" stroke="#8A8278" stroke-width="1.5"/>
-        <path d="M24 14c0-4 4-6 4-10" stroke="#8A8278" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M32 14c0-4 4-6 4-10" stroke="#8A8278" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <span>ФОТО</span>
-    </div>
-    <div class="story-img-overlay"></div>
-    <div class="story-accent"></div>
-  </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/@barba/core"></script>
+    <script src="https://unpkg.com/split-type"></script>
 
-  <div class="story-text">
-    <div class="section-tag">Наша история</div>
-    <h2 class="split-text" id="storyTitle">Кофе — это не просто напиток. Это ритуал.</h2>
-    <p>Мы начали с одной идеи: каждая чашка должна рассказывать историю зерна, фермера и земли, где оно выращено. Мы работаем только с лучшими плантациями мира.</p>
-    <p>MOKA — это место, где замедляется время. Где каждый глоток — медитация. Где бариста — художник.</p>
+    <script>
+        // Регистрация плагина ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
 
-    <div class="story-stats">
-      <div>
-        <div class="stat-num counter" data-target="20">0</div>
-        <div class="stat-label">Авторских напитков</div>
-      </div>
-      <div>
-        <div class="stat-num counter" data-target="12">0</div>
-        <div class="stat-label">Стран-поставщиков</div>
-      </div>
-      <div>
-        <div class="stat-num counter" data-target="5">0</div>
-        <div class="stat-label">Лет мастерства</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Menu -->
-<section id="menu">
-  <div class="menu-header">
-    <div>
-      <div class="section-tag" style="color: var(--latte);">
-        <span style="background:var(--latte)"></span>
-        Наше меню
-      </div>
-      <h2 class="menu-title">20 причин<br><em>влюбиться</em></h2>
-    </div>
-    <div class="menu-filter">
-      <button class="filter-btn active" onclick="filterMenu('all', this)">Все</button>
-      <button class="filter-btn" onclick="filterMenu('espresso', this)">Эспрессо</button>
-      <button class="filter-btn" onclick="filterMenu('milk', this)">Молочные</button>
-      <button class="filter-btn" onclick="filterMenu('special', this)">Авторские</button>
-    </div>
-  </div>
-
-  <div class="menu-grid" id="menuGrid">
-  </div>
-</section>
-
-<!-- Featured Parallax -->
-<section id="featured">
-  <div class="featured-bg" id="featuredBg">
-    <div class="featured-photo-placeholder">
-      <svg width="60" height="60" viewBox="0 0 64 64" fill="none" style="opacity:0.12">
-        <circle cx="32" cy="32" r="20" stroke="white" stroke-width="1.5"/>
-        <circle cx="32" cy="32" r="12" stroke="white" stroke-width="1.5"/>
-        <circle cx="32" cy="32" r="4" fill="white" opacity="0.5"/>
-      </svg>
-      <span style="color:rgba(255,255,255,0.1);font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;">ФОТО</span>
-    </div>
-  </div>
-  <div class="featured-overlay"></div>
-  <div class="featured-content" id="featuredContent">
-    <div class="featured-label">Сезонный хит</div>
-    <h2 class="featured-title">Палящий<br><em>карамельный</em><br>латте</h2>
-    <a href="#" class="featured-cta">Попробовать сейчас</a>
-  </div>
-</section>
-
-<!-- Testimonials -->
-<section id="testimonials">
-  <div class="section-tag">Отзывы гостей</div>
-  <h2 style="font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);margin-bottom:0;line-height:1.1;color:var(--espresso);">
-    Что говорят<br><em style="font-style:italic;color:var(--caramel);">наши гости</em>
-  </h2>
-
-  <div class="testimonials-grid">
-    <div class="testimonial-card clip-reveal" data-anim="clip">
-      <div class="testimonial-quote">"</div>
-      <p class="testimonial-text">Лучший флэт уайт в городе. Мягкий, сбалансированный, с нотками шоколада. Теперь прихожу каждое утро.</p>
-      <div class="testimonial-author">Анна Соколова</div>
-      <div class="testimonial-role">Архитектор</div>
-    </div>
-    <div class="testimonial-card clip-reveal" data-anim="clip">
-      <div class="testimonial-quote">"</div>
-      <p class="testimonial-text">Пространство, атмосфера, кофе — всё на уровне. Здесь работать одно удовольствие. Матча латте — просто космос.</p>
-      <div class="testimonial-author">Марк Иванов</div>
-      <div class="testimonial-role">Дизайнер</div>
-    </div>
-    <div class="testimonial-card clip-reveal" data-anim="clip">
-      <div class="testimonial-quote">"</div>
-      <p class="testimonial-text">Наконец нашла место, где понимают specialty кофе. Бариста знают всё о происхождении зёрен. Потрясающе.</p>
-      <div class="testimonial-author">Диана Ли</div>
-      <div class="testimonial-role">Фотограф</div>
-    </div>
-  </div>
-</section>
-
-<!-- Footer -->
-<footer>
-  <div class="footer-top">
-    <div>
-      <div class="footer-logo">MOKA</div>
-      <p class="footer-tagline">Каждая чашка — маленькое путешествие. От зерна до глотка.</p>
-      <div class="footer-social">
-        <a href="#">IG</a>
-        <a href="#">TG</a>
-        <a href="#">VK</a>
-      </div>
-    </div>
-    <div>
-      <div class="footer-heading">Меню</div>
-      <ul class="footer-links">
-        <li><a href="#">Эспрессо-напитки</a></li>
-        <li><a href="#">Молочные напитки</a></li>
-        <li><a href="#">Авторские напитки</a></li>
-        <li><a href="#">Сезонное меню</a></li>
-        <li><a href="#">Выпечка</a></li>
-      </ul>
-    </div>
-    <div>
-      <div class="footer-heading">Компания</div>
-      <ul class="footer-links">
-        <li><a href="#">О нас</a></li>
-        <li><a href="#">Карьера</a></li>
-        <li><a href="#">Франшиза</a></li>
-        <li><a href="#">Пресса</a></li>
-      </ul>
-    </div>
-    <div>
-      <div class="footer-heading">Контакты</div>
-      <ul class="footer-links">
-        <li><a href="#">ул. Кофейная, 12</a></li>
-        <li><a href="#">Пн–Вс: 7:00–22:00</a></li>
-        <li><a href="#">hello@moka.coffee</a></li>
-        <li><a href="#">+7 (999) 000-00-00</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <div class="footer-copy">© 2024 MOKA Specialty Coffee. Все права защищены.</div>
-    <div class="footer-copy">Сделано с ♥ и кофеином</div>
-  </div>
-</footer>
-
-<script>
-const drinks = [
-  { id:1, name:"Эспрессо", tag:"espresso", cat:"espresso", desc:"Классический двойной шот. Интенсивный и чистый.", price:"180 ₽" },
-  { id:2, name:"Американо", tag:"espresso", cat:"espresso", desc:"Эспрессо с горячей водой. Мягко и глубоко.", price:"200 ₽" },
-  { id:3, name:"Капучино", tag:"milk", cat:"milk", desc:"Бархатная пена, нежное молоко, яркий эспрессо.", price:"280 ₽" },
-  { id:4, name:"Флэт Уайт", tag:"milk", cat:"milk", desc:"Австралийский классик. Двойной ристретто в молоке.", price:"300 ₽" },
-  { id:5, name:"Латте", tag:"milk", cat:"milk", desc:"Большой, молочный, обволакивающий.", price:"320 ₽" },
-  { id:6, name:"Раф", tag:"special", cat:"special", desc:"Эспрессо, сливки, ванильный сахар. Бархатный.", price:"360 ₽" },
-  { id:7, name:"Корто", tag:"espresso", cat:"espresso", desc:"Ристретто в чистом виде. Только суть.", price:"160 ₽" },
-  { id:8, name:"Матча Латте", tag:"special", cat:"special", desc:"Церемониальная матча с овсяным молоком.", price:"380 ₽" },
-  { id:9, name:"Карамельный Макиато", tag:"milk", cat:"milk", desc:"Ваниль, карамель, эспрессо слоями.", price:"350 ₽" },
-  { id:10, name:"Холодный Брю", tag:"special", cat:"special", desc:"24 часа холодной экстракции. Гладкий, мощный.", price:"340 ₽" },
-  { id:11, name:"Азиато", tag:"special", cat:"special", desc:"Эспрессо + кокосовое молоко + пальмовый сахар.", price:"370 ₽" },
-  { id:12, name:"Лавандовый Раф", tag:"special", cat:"special", desc:"Нежный цветочный аромат, сливочная текстура.", price:"390 ₽" },
-  { id:13, name:"Кортадо", tag:"espresso", cat:"espresso", desc:"Эспрессо с равным количеством молока.", price:"260 ₽" },
-  { id:14, name:"Пикколо", tag:"milk", cat:"milk", desc:"Маленький латте для ценителей концентрата.", price:"270 ₽" },
-  { id:15, name:"Ванильный Латте", tag:"milk", cat:"milk", desc:"Домашний сироп ванили, шелковистое молоко.", price:"330 ₽" },
-  { id:16, name:"Эспрессо Тоник", tag:"special", cat:"special", desc:"Эспрессо на тонике со льдом. Освежающий контраст.", price:"350 ₽" },
-  { id:17, name:"Чайный Латте", tag:"special", cat:"special", desc:"Масала чай с молоком и кардамоном.", price:"310 ₽" },
-  { id:18, name:"Нитро Кофе", tag:"special", cat:"special", desc:"Холодный брю под азотом из крана. Пышная пена.", price:"400 ₽" },
-  { id:19, name:"Мокко", tag:"milk", cat:"milk", desc:"Шоколад, эспрессо, молоко. Классика.", price:"340 ₽" },
-  { id:20, name:"Дальгона", tag:"special", cat:"special", desc:"Взбитый крем из кофе на холодном молоке.", price:"360 ₽" },
-];
-
-function buildMenu(filter = 'all') {
-  const grid = document.getElementById('menuGrid');
-  grid.innerHTML = '';
-  const filtered = filter === 'all' ? drinks : drinks.filter(d => d.cat === filter);
-  filtered.forEach((d, i) => {
-    const card = document.createElement('div');
-    card.className = 'menu-card';
-    card.setAttribute('data-cat', d.cat);
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    card.innerHTML = `
-      <div class="card-photo">
-        <span class="card-number">${String(d.id).padStart(2,'0')}</span>
-        <svg class="coffee-svg" viewBox="0 0 64 64" fill="none">
-          <path d="M16 20h32l-4 24H20L16 20z" stroke="white" stroke-width="1"/>
-          <path d="M48 26c4 0 8 2 8 6s-4 6-8 6" stroke="white" stroke-width="1"/>
-          <path d="M26 14c0-4 3-5 3-8" stroke="white" stroke-width="1" stroke-linecap="round"/>
-          <path d="M35 14c0-4 3-5 3-8" stroke="white" stroke-width="1" stroke-linecap="round"/>
-        </svg>
-        <span class="card-photo-text">ФОТО</span>
-      </div>
-      <div class="card-tag">${d.tag}</div>
-      <div class="card-name">${d.name}</div>
-      <div class="card-desc">${d.desc}</div>
-      <div class="card-footer">
-        <span class="card-price">${d.price}</span>
-        <span class="card-order">Заказать</span>
-      </div>
-    `;
-    grid.appendChild(card);
-    gsap.to(card, { opacity:1, y:0, duration:0.5, delay: i*0.05, ease:'power2.out' });
-  });
-}
-
-function filterMenu(cat, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  buildMenu(cat);
-}
-
-window.filterMenu = filterMenu;
-</script>
-
-<script>
-gsap.registerPlugin(ScrollTrigger);
-
-// Lenis smooth scroll
-const lenis = new Lenis({
-  duration: 1.3,
-  easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-  direction: 'vertical',
-  smooth: true,
-});
-
-lenis.on('scroll', ScrollTrigger.update);
-
-gsap.ticker.add(time => lenis.raf(time * 1000));
-gsap.ticker.lagSmoothing(0);
-
-// Progress bar
-lenis.on('scroll', ({ progress }) => {
-  gsap.to('#progressLine', { scaleX: progress, ease:'none', duration:0 });
-});
-
-// Cursor
-const cursor = document.getElementById('cursor');
-const follower = document.getElementById('cursorFollower');
-let mx = 0, my = 0;
-
-document.addEventListener('mousemove', e => {
-  mx = e.clientX; my = e.clientY;
-  gsap.to(cursor, { x: mx, y: my, duration: 0 });
-  gsap.to(follower, { x: mx, y: my, duration: 0.15 });
-});
-
-document.querySelectorAll('a, button, .menu-card').forEach(el => {
-  el.addEventListener('mouseenter', () => {
-    gsap.to(cursor, { scale: 2.5, duration: 0.3 });
-    gsap.to(follower, { scale: 1.5, opacity: 0.5, duration: 0.3 });
-  });
-  el.addEventListener('mouseleave', () => {
-    gsap.to(cursor, { scale: 1, duration: 0.3 });
-    gsap.to(follower, { scale: 1, opacity: 1, duration: 0.3 });
-  });
-});
-
-// Loader
-window.addEventListener('load', () => {
-  const tl = gsap.timeline();
-  tl.to('#loader .loader-logo', { opacity: 1, duration: 0.6, ease: 'power2.out' })
-    .to('#loaderProgress', { scaleX: 1, duration: 1.2, ease: 'power2.inOut' }, '-=0.2')
-    .to('#loader', { yPercent: -100, duration: 0.9, ease: 'power3.inOut', delay: 0.3 })
-    .from('nav', { yPercent: -100, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.3')
-    .call(() => initAnimations());
-});
-
-function initAnimations() {
-  // SplitType hero title
-  const heroSplit = new SplitType('#heroTitle', { types: 'chars,words' });
-  gsap.from(heroSplit.chars, {
-    opacity: 0,
-    y: 40,
-    rotateX: -40,
-    stagger: 0.022,
-    duration: 0.7,
-    ease: 'power3.out',
-  });
-
-  // Hero extras
-  gsap.to('#heroTag', { opacity: 1, x: 0, duration: 0.8, delay: 0.6, ease: 'power2.out' });
-  gsap.to('#heroScroll', { opacity: 1, duration: 0.8, delay: 1, ease: 'power2.out' });
-
-  // Marquee
-  gsap.to('#marqueeTrack', {
-    x: '-50%',
-    duration: 20,
-    ease: 'none',
-    repeat: -1,
-  });
-
-  // Story title split
-  const storySplit = new SplitType('#storyTitle', { types: 'lines' });
-  gsap.from(storySplit.lines, {
-    opacity: 0,
-    y: 30,
-    stagger: 0.12,
-    duration: 0.8,
-    ease: 'power3.out',
-    scrollTrigger: {
-      trigger: '#storyTitle',
-      start: 'top 80%',
-    }
-  });
-
-  // Story image parallax
-  gsap.to('[data-parallax]', {
-    y: -60,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: '#story',
-      start: 'top bottom',
-      end: 'bottom top',
-      scrub: 1.5,
-    }
-  });
-
-  // Counters
-  document.querySelectorAll('.counter').forEach(el => {
-    const target = +el.dataset.target;
-    ScrollTrigger.create({
-      trigger: el,
-      start: 'top 85%',
-      onEnter: () => {
-        gsap.to({ val: 0 }, {
-          val: target,
-          duration: 1.5,
-          ease: 'power2.out',
-          onUpdate: function() {
-            el.textContent = Math.round(this.targets()[0].val);
-          }
+        // 1. Активация мягкого премиального скролла Lenis
+        const lenis = new Lenis({
+            duration: 1.4,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
         });
-      },
-      once: true
-    });
-  });
 
-  // Featured parallax
-  gsap.to('#featuredBg', {
-    y: 80,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: '#featured',
-      start: 'top bottom',
-      end: 'bottom top',
-      scrub: true,
-    }
-  });
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
 
-  // Featured title split
-  const featSplit = new SplitType('#featuredContent h2', { types: 'lines' });
-  gsap.from(featSplit.lines, {
-    opacity: 0,
-    y: 50,
-    stagger: 0.1,
-    duration: 0.9,
-    ease: 'power3.out',
-    scrollTrigger: {
-      trigger: '#featured',
-      start: 'top 65%',
-    }
-  });
+        // Синхронизация Lenis с GSAP ScrollTrigger
+        lenis.on('scroll', ScrollTrigger.update);
 
-  // Testimonials clip reveal
-  document.querySelectorAll('[data-anim="clip"]').forEach((el, i) => {
-    gsap.to(el, {
-      clipPath: 'inset(0 0 0% 0)',
-      duration: 0.9,
-      ease: 'power3.inOut',
-      delay: i * 0.12,
-      scrollTrigger: {
-        trigger: el,
-        start: 'top 85%',
-      }
-    });
-  });
+        // 2. Инициализация анимации появления текста по буквам (SplitType + GSAP)
+        const textToReveal = document.querySelector('.reveal-text');
+        if (textToReveal) {
+            // Защита от FOUC
+            textToReveal.classList.add('split-ready');
+            
+            const split = new SplitType(textToReveal, { types: 'chars' });
+            
+            gsap.from(split.chars, {
+                opacity: 0,
+                y: 40,
+                scale: 1.2,
+                rotationX: -40,
+                stagger: 0.03,
+                duration: 1.2,
+                ease: 'power4.out',
+                delay: 0.2
+            });
+        }
 
-  // Menu cards entrance on scroll (after build)
-  buildMenu('all');
+        // 3. Эффект плавного интерактивного увеличения (масштабирования) серого пространства ФОТО при скролле
+        const photoContainers = document.querySelectorAll('.photo-placeholder');
+        photoContainers.forEach((container) => {
+            const innerPhoto = container.querySelector('.photo-inner');
+            if (innerPhoto) {
+                gsap.fromTo(innerPhoto, 
+                    { scale: 1 }, 
+                    {
+                        scale: 1.12,
+                        ease: 'none',
+                        scrollTrigger: {
+                            trigger: container,
+                            start: 'top bottom',
+                            end: 'bottom top',
+                            scrub: true
+                        }
+                    }
+                );
+            }
+        });
 
-  ScrollTrigger.create({
-    trigger: '#menu',
-    start: 'top 70%',
-    onEnter: () => {
-      gsap.from('.menu-card', {
-        opacity: 0,
-        y: 30,
-        stagger: 0.06,
-        duration: 0.6,
-        ease: 'power2.out',
-      });
-    },
-    once: true
-  });
-
-  // Nav shrink on scroll
-  ScrollTrigger.create({
-    trigger: 'body',
-    start: '100px top',
-    onEnter: () => gsap.to('nav', { paddingTop: '1rem', paddingBottom: '1rem', duration: 0.4 }),
-    onLeaveBack: () => gsap.to('nav', { paddingTop: '1.5rem', paddingBottom: '1.5rem', duration: 0.4 }),
-  });
-}
-</script>
-
+        // 4. Инициализация Barba.js структуры (заглушка для работы роутинга без перезагрузок)
+        barba.init({
+            transitions: [{
+                name: 'opacity-transition',
+                leave(data) {
+                    return gsap.to(data.current.container, {
+                        opacity: 0,
+                        duration: 0.5
+                    });
+                },
+                enter(data) {
+                    return gsap.from(data.next.container, {
+                        opacity: 0,
+                        duration: 0.5
+                    });
+                }
+            }]
+        });
+    </script>
 </body>
 </html>
